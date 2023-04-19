@@ -12,7 +12,7 @@ A = np.array([[3, 3, 4], [6, -2, -12], [-2, 3, 9]])
 vp, vep = np.linalg.eig(A)
 
 # A est scindé à racines simples, donc diagonalisable dans R
-print("Valeurs propre: ", vp)
+print("Valeurs propres de A : ", vp)
 
 # on trie les valeurs propres en gardant l'ordre des vecteurs propres associés
 idx = vp.argsort()[::1]
@@ -21,14 +21,16 @@ vep = vep[:, idx]
 
 D = np.diag(vp, 0)
 P = np.array(vep)
-P_ = np.linalg.inv(P)
+Pinv = np.linalg.inv(P)
 
 A_ = np.dot(P, D)
-A_ = np.dot(A_, P_)
+A_ = np.dot(A_, Pinv)
 
+print("P = \n", P)
 print("D = \n", D)
-# on remarque que les int de A ont été cast en float
-print("\nPAP^ = \n", A_)
+print("P^{-1} = \n", Pinv)
+# on remarque que les int de A ont été cast en float c'est pas grave
+print("\nPAP^{-1} = \n", A_)
 # e_j est un vecteur propre associé à la valeur propre de la j-eme colonne de D
 
 
@@ -119,6 +121,7 @@ def inverse_power_iteration(A, max_iter=1000, tol=1e-8):
 # On test avec A de la question 1
 # Plus grande valeur propre et vecteur propre associé
 lam1, v1 = power_iteration(A)
+print("\n Puissance itérée :")
 print("Plus grande valeur propre : %.4f" % lam1)
 print("Vecteur propre associé : ", v1)
 
@@ -149,23 +152,19 @@ def dgamma(t):
     return 1 / (2j*np.pi) * gamma(t)
 
 
-# j'ai voulu d'abord définir l'integrale curviligne réelle et la réutiliser pour
-# calculer celle complexe mais vu que la complexe demande un paramettre en plus:
-# la variable d'intégration, j'ai finalement fait une redéfinition...
-
 def integrale_curviligne(f, gamma, dgamma, a=0, b=1):
     """ 
     L'intégrale curviligne de f le long de gamma.
 
     Parameters: 
     -----------
-    f : fonction.
+    f : fonction complexe.
     gamma : fonction.
         Chemin de classe C1 par morceaux.
     dgamma : fonction.
         Dérivée de gamma.
     a,b : float.
-        Borne d'intégrations, domaine de gamma.
+        Bornes d'intégrations, domaine de gamma.
 
     Returns:
     -------
@@ -201,5 +200,65 @@ def f2(z):
 I_1, err1 = integrale_curviligne(f1, gamma, dgamma, 0, 1)
 I_2, err2 = integrale_curviligne(f2, gamma, dgamma, 0, 1)
 
-print("I_1: ", I_1, " Erreur d'integration: ", err1)
-print("I_2: ", I_2, " Erreur d'integration: ", err2)
+print("\n Intégrales curvilignes complexe : ")
+print("I_1: ", I_1, " ,Erreur d'integration: ", err1)
+print("I_2: ", I_2, " ,Erreur d'integration: ", err2)
+
+
+### Question 5 ###
+
+def rectangle_gauche(f, a, b, N):
+    """ Intégration numérique par la méthode des rectangles à gauches.
+
+    Parameters:
+    -----------
+    f : fonction à valeurs complexe.
+    a,b : floats.
+        Bornes d'intégrations.
+    N : int. 
+        Nombre de pas dans la subdivisions.
+
+    Returns
+    ------
+    res : complexe.
+        La valeur approcher de l'intégrale de f sur [a,b].
+    """
+    res = 0.0
+    h = (b - a) / float(N)  # pas de la subdivision
+
+    for i in range(N):
+        x = a + i*h     # i commence à 0, on prend le point à gauche du rectangle
+        res += f(x) * h  # hauteur * base
+
+    return res
+
+
+J_1 = rectangle_gauche(f1, 0, 1, 10000)
+J_2 = rectangle_gauche(f2, 0, 1, 10000)
+
+print("\n Méthodes des rectangles à gauches : ")
+print("J_1 = ", J_1)
+print("J_2 = ", J_2)
+
+# La méthode est d'ordre >1 car d'apres la question 3, gamma est une fonction
+# régulière définie sur l'intervalle [0,1] et d'apres le papier cité en source
+# du sujet (https://irma.math.unistra.fr/~helluy/PREPRINTS/cras1998.pdf)
+# on peut utiliser la méthode dite de "périodisation"
+
+
+### Question 6 ###
+
+t = sp.Symbol('t', real=True)
+gamma = 2 * sp.exp(2 * sp.I * sp.pi * t)
+# dgamma = sp.diff(gamma, t)
+dgamma = 4 * sp.I * sp.pi * sp.exp(2 * sp.I * sp.pi * t)
+
+z = sp.Symbol('z')
+A_symb = sp.Matrix([[3, 3, 4], [6, -2, -12], [-2, 3, 9]])
+I_symb = sp.Matrix.eye(3)
+f = sp.Matrix(z * I_symb - A_symb).inv()
+h = f.subs(z, gamma)
+int_f = 1 / (2*sp.I*sp.pi) * sp.integrate(h * dgamma, t)
+
+print("Intégrale symbolique : \n")
+sp.pprint(sp.simplify(int_f))
