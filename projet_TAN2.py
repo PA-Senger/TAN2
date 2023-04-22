@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sympy as sp
 import scipy.integrate as spi
 
-# np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
+# np.set_printoptions(formatter={'float': lambda x: "{0:0.2f}".format(x)})
 
 ### Question 1 ###
 
@@ -26,12 +26,24 @@ Pinv = np.linalg.inv(P)
 A_ = np.dot(P, D)
 A_ = np.dot(A_, Pinv)
 
-print("P = \n", P)
-print("D = \n", D)
-print("P^{-1} = \n", Pinv)
+print("\nP = \n", np.around(P, 2))
+print("\nD = \n", np.around(D, 2))
+print("\nP^{-1} = \n", np.around(Pinv, 2))
 # on remarque que les int de A ont été cast en float c'est pas grave
 print("\nPAP^{-1} = \n", A_)
 # e_j est un vecteur propre associé à la valeur propre de la j-eme colonne de D
+
+# on met tout dans une fonction pour l'utilisé dans la derniere question
+
+
+def diagonalize(A):
+    vp, vep = np.linalg.eig(A)
+    idx = vp.argsort()[::1]
+    vp = vp[idx]
+    vep = vep[:, idx]
+    D = np.diag(vp, 0)
+    P = np.array(vep)
+    return D, P
 
 
 ### Question 2 ###
@@ -105,7 +117,7 @@ def inverse_power_iteration(A, max_iter=1000, tol=1e-8):
     lam = 0.0
 
     for i in range(max_iter):
-        v_new = np.linalg.solve(A, v)        # v_k+1 = A * v_k
+        v_new = np.linalg.solve(A, v)
         lam_new = np.linalg.norm(v_new)
         v_new = v_new / lam_new              # v_k+1 / norme(v_k+1)
 
@@ -121,14 +133,15 @@ def inverse_power_iteration(A, max_iter=1000, tol=1e-8):
 # On test avec A de la question 1
 # Plus grande valeur propre et vecteur propre associé
 lam1, v1 = power_iteration(A)
-print("\n Puissance itérée :")
-print("Plus grande valeur propre : %.4f" % lam1)
-print("Vecteur propre associé : ", v1)
+print("\n--------------------\n")
+print("Puissance itérée :")
+print("Plus grande valeur propre : " % lam1)
+print("Vecteur propre associé : ", np.around(v1, 4))
 
 # Plus petite valeur propre et vecteur propre associé
 lam2, v2 = inverse_power_iteration(A)
-print("Plus petite valeur propre : %.4f" % lam2)
-print("Vecteur propre associé : ", v2)
+print("\nPlus petite valeur propre : " % lam2)
+print("Vecteur propre associé : ", np.around(v2, 4))
 
 
 ### Question 2 ###
@@ -149,14 +162,14 @@ plt.plot(x, y)
 
 def dgamma(t):
     """ Dérivé de la fonction gamma définie plus haut."""
-    return 1 / (2j*np.pi) * gamma(t)
+    return 2j*np.pi * gamma(t)
 
 
 def integrale_curviligne(f, gamma, dgamma, a=0, b=1):
-    """ 
+    """
     L'intégrale curviligne de f le long de gamma.
 
-    Parameters: 
+    Parameters:
     -----------
     f : fonction complexe.
     gamma : fonction.
@@ -199,10 +212,10 @@ def f2(z):
 
 I_1, err1 = integrale_curviligne(f1, gamma, dgamma, 0, 1)
 I_2, err2 = integrale_curviligne(f2, gamma, dgamma, 0, 1)
-
-print("\n Intégrales curvilignes complexe : ")
-print("I_1: ", I_1, " ,Erreur d'integration: ", err1)
-print("I_2: ", I_2, " ,Erreur d'integration: ", err2)
+print("\n--------------------\n")
+print("Intégrales curvilignes complexe : ")
+print("Jc(f1): ", I_1, " ,Erreur d'integration: ", err1)
+print("Jc(f2): ", I_2, " ,Erreur d'integration: ", err2)
 
 
 ### Question 5 ###
@@ -215,7 +228,7 @@ def rectangle_gauche(f, a, b, N):
     f : fonction à valeurs complexe.
     a,b : floats.
         Bornes d'intégrations.
-    N : int. 
+    N : int.
         Nombre de pas dans la subdivisions.
 
     Returns
@@ -223,7 +236,7 @@ def rectangle_gauche(f, a, b, N):
     res : complexe.
         La valeur approcher de l'intégrale de f sur [a,b].
     """
-    res = 0.0
+    res = 0j
     h = (b - a) / float(N)  # pas de la subdivision
 
     for i in range(N):
@@ -233,12 +246,20 @@ def rectangle_gauche(f, a, b, N):
     return res
 
 
-J_1 = rectangle_gauche(f1, 0, 1, 10000)
-J_2 = rectangle_gauche(f2, 0, 1, 10000)
+# Test
+def exp(x):
+    return np.exp(x)
 
-print("\n Méthodes des rectangles à gauches : ")
-print("J_1 = ", J_1)
-print("J_2 = ", J_2)
+
+print("\n--------------------\n")
+# e-1 ~= 1.718
+print("Test rectangle gauche : ", rectangle_gauche(exp, 0, 1, 10000))
+
+J_1 = rectangle_gauche(lambda t: f1(gamma(t))*dgamma(t), 0, 1, 10000)
+J_2 = rectangle_gauche(lambda t: f2(gamma(t))*dgamma(t), 0, 1, 10000)
+print("\nMéthodes des rectangles à gauches : ")
+print("J(f1) = ", J_1)
+print("J(f2)= ", J_2)
 
 # La méthode est d'ordre >1 car d'apres la question 3, gamma est une fonction
 # régulière définie sur l'intervalle [0,1] et d'apres le papier cité en source
@@ -248,17 +269,132 @@ print("J_2 = ", J_2)
 
 ### Question 6 ###
 
-t = sp.Symbol('t', real=True)
+# Pour la partie gauche, on calcul l'intégrale curviligne
+
+t = sp.Symbol('t')
+# Chemin gamma
 gamma = 2 * sp.exp(2 * sp.I * sp.pi * t)
-# dgamma = sp.diff(gamma, t)
+# La dérivé de gamma
 dgamma = 4 * sp.I * sp.pi * sp.exp(2 * sp.I * sp.pi * t)
 
-z = sp.Symbol('z')
-A_symb = sp.Matrix([[3, 3, 4], [6, -2, -12], [-2, 3, 9]])
-I_symb = sp.Matrix.eye(3)
-f = sp.Matrix(z * I_symb - A_symb).inv()
-h = f.subs(z, gamma)
-int_f = 1 / (2*sp.I*sp.pi) * sp.integrate(h * dgamma, t)
 
+# Notre matrice A
+A_symb = sp.Matrix([[3, 3, 4], [6, -2, -12], [-2, 3, 9]])
+
+B = gamma * sp.eye(3) - A_symb
+f = B.inv() * dgamma
+
+# L'intégrale curviligne recherché
+int_f = (1 / (2*sp.I*sp.pi)) * sp.integrate(f, (t, 0, 1))
+
+print("\n--------------------\n")
 print("Intégrale symbolique : \n")
-sp.pprint(sp.simplify(int_f))
+sp.pprint(int_f)
+
+# Pour la partie droite, on doit créer la projection
+
+# La matrice J_1 de l'énoncer
+J = sp.Matrix.zeros(3)
+J[0, 0] = 1
+
+# Pour obtenir P et P**-1 on diagonalise A avec sympy
+
+# Diagonalisation de la matrice A
+# Les vp sont dans l'ordre croissant
+P, D = A_symb.diagonalize(sort=True)
+# sp.pprint(D)
+
+# Vérification :
+# sp.pprint(P * D * P**-1)
+
+Pi_1 = P * J * P**-1
+sp.pprint(Pi_1)
+
+
+### Question 7 ###
+
+# on va crée notre matrice intégrande puis utiliser la methode des rectangles
+# à gauche pour intégrer chaque entrée de la matrice
+
+def contour(gamma, dgamma, A, a, b, N):
+    """Calcule la formule de l'integrale de contour d'une matrice.
+
+    Parameters:
+    -----------
+    gamma : function.
+        Chemin C1 par morceaux
+    dgamma : function.
+        Dérivée de gamma.
+    A : array.
+        Matrice.
+    a,b : float. 
+        Borne d'intégration.
+    N : int. 
+        Nombre d'itérations.
+
+    Returns:
+    --------
+        res : array.
+            Matrice des intégrales.
+    """
+    n, m = np.shape(A)
+    res = np.zeros((n, m), dtype=complex)
+
+    def integrande(t):
+        return np.linalg.inv(gamma(t)*np.eye(n) - A) * dgamma(t)
+
+    for i in range(n):
+        for j in range(m):  # c'est une matrice carré de toute facon mais bon
+            res[i, j] = rectangle_gauche(
+                lambda t: integrande(t)[i, j], a, b, N)
+
+    return res
+
+
+# Chemin gamma
+def gamma2(t):
+    return 2 * np.exp(2 * 1j * np.pi * t)
+
+
+# La dérivée de gamma
+def dgamma2(t):
+    return 4j * np.pi * np.exp(2 * 1j * np.pi * t)
+
+
+contour = contour(gamma2, dgamma2, A, 0, 1, 1000)
+print("\n--------------------\n")
+print("Contour numérique : \n")
+print(contour)
+
+
+def projection(A, K):
+    """Calcule la formule de la somme sur k dans K des projections PI_k.
+
+    Parameters:
+    ----------
+    A : array.
+        Matrice.
+    K : array.
+        Veteur contenant les indices.
+
+    Returns:
+    -------
+        res : array.
+            Matrice de la somme des projections.
+    """
+    def proj(i, A):
+        D, P = diagonalize(A)
+        n, m = np.shape(P)
+        J = np.zeros((n, m))
+        J[i-1, i-1] = 1
+        proj = P @ J @ np.linalg.inv(P)
+        return proj
+    res = np.zeros(np.shape(A))
+    for i in range(len(K)):
+        res += proj(K[i], A)
+    return res
+
+
+print("\nProjection : \n")
+K = [1]
+print(projection(A, K))
