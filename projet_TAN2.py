@@ -23,8 +23,7 @@ D = np.diag(vp, 0)
 P = np.array(vep)
 Pinv = np.linalg.inv(P)
 
-A_ = np.dot(P, D)
-A_ = np.dot(A_, Pinv)
+A_ = P @ D @ Pinv  # @ : dot product
 
 print("\nP = \n", np.around(P, 2))
 print("\nD = \n", np.around(D, 2))
@@ -33,10 +32,23 @@ print("\nP^{-1} = \n", np.around(Pinv, 2))
 print("\nPAP^{-1} = \n", A_)
 # e_j est un vecteur propre associé à la valeur propre de la j-eme colonne de D
 
+
 # on met tout dans une fonction pour l'utilisé dans la derniere question
-
-
 def diagonalize(A):
+    """"Diagonalise A en mettant les valeurs propre dans l'ordre croissant.
+    Attention la fonction ne vérifie pas que A est diagonalisable !
+
+    Parameters:
+    ----------
+    A : array.
+        Matrice à diagonalisé.
+
+    Returns:
+    -------
+    (D, P) : couple of arrays.
+        D est la matrice diagonale avec les vp triée ,ie d1,1 < d2,2 < .. < dn,n.
+        P est la matrice de passage.
+    """
     vp, vep = np.linalg.eig(A)
     idx = vp.argsort()[::1]
     vp = vp[idx]
@@ -144,7 +156,7 @@ print("\nPlus petite valeur propre : " % lam2)
 print("Vecteur propre associé : ", np.around(v2, 4))
 
 
-### Question 2 ###
+### Question 3 ###
 
 def gamma(t):
     return np.exp((2j*np.pi*t))  # j est l'unité imaginaire en python
@@ -220,7 +232,7 @@ print("Jc(f2): ", I_2, " ,Erreur d'integration: ", err2)
 
 ### Question 5 ###
 
-def rectangle_gauche(f, a, b, N):
+def rectangle_gauche(f, a, b, N=1000):
     """ Intégration numérique par la méthode des rectangles à gauches.
 
     Parameters:
@@ -229,7 +241,7 @@ def rectangle_gauche(f, a, b, N):
     a,b : floats.
         Bornes d'intégrations.
     N : int.
-        Nombre de pas dans la subdivisions.
+        Nombre de pas dans la subdivision.
 
     Returns
     ------
@@ -277,7 +289,6 @@ gamma = 2 * sp.exp(2 * sp.I * sp.pi * t)
 # La dérivé de gamma
 dgamma = 4 * sp.I * sp.pi * sp.exp(2 * sp.I * sp.pi * t)
 
-
 # Notre matrice A
 A_symb = sp.Matrix([[3, 3, 4], [6, -2, -12], [-2, 3, 9]])
 
@@ -316,7 +327,7 @@ sp.pprint(Pi_1)
 # on va crée notre matrice intégrande puis utiliser la methode des rectangles
 # à gauche pour intégrer chaque entrée de la matrice
 
-def contour(gamma, dgamma, A, a, b, N):
+def contour(gamma, dgamma, A, a, b, N=1000):
     """Calcule la formule de l'integrale de contour d'une matrice.
 
     Parameters:
@@ -330,7 +341,7 @@ def contour(gamma, dgamma, A, a, b, N):
     a,b : float. 
         Borne d'intégration.
     N : int. 
-        Nombre d'itérations.
+        Nombre de pas dans la subdivision.
 
     Returns:
     --------
@@ -353,12 +364,12 @@ def contour(gamma, dgamma, A, a, b, N):
 
 # Chemin gamma
 def gamma2(t):
-    return 2 * np.exp(2 * 1j * np.pi * t)
+    return 2 * np.exp(2j * np.pi * t)
 
 
 # La dérivée de gamma
 def dgamma2(t):
-    return 4j * np.pi * np.exp(2 * 1j * np.pi * t)
+    return 4j * np.pi * np.exp(2j * np.pi * t)
 
 
 contour = contour(gamma2, dgamma2, A, 0, 1, 1000)
