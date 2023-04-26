@@ -147,12 +147,12 @@ def inverse_power_iteration(A, max_iter=1000, tol=1e-8):
 lam1, v1 = power_iteration(A)
 print("\n--------------------\n")
 print("Puissance itérée :")
-print("Plus grande valeur propre : " % lam1)
+print("Plus grande valeur propre : ", np.around(lam1, 4))
 print("Vecteur propre associé : ", np.around(v1, 4))
 
 # Plus petite valeur propre et vecteur propre associé
 lam2, v2 = inverse_power_iteration(A)
-print("\nPlus petite valeur propre : " % lam2)
+print("\nPlus petite valeur propre : ", np.around(lam2, 4))
 print("Vecteur propre associé : ", np.around(v2, 4))
 
 
@@ -165,7 +165,9 @@ def gamma(t):
 t = np.linspace(0, 1, 1000)     # subdivsion de [0;1]
 z = gamma(t)                    # notre nombre complexe evalué sur la sub [0,1]
 x, y = np.real(z), np.imag(z)
-plt.title("Courbe paramétrée")
+plt.title("Courbe paramétrée de Gamma")
+plt.xlabel("Re")
+plt.ylabel("Img")
 plt.plot(x, y)
 # plt.show()
 
