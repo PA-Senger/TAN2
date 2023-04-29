@@ -35,7 +35,8 @@ print("\nPAP^{-1} = \n", A_)
 
 # on met tout dans une fonction pour l'utilisé dans la derniere question
 def diagonalize(A):
-    """"Diagonalise A en mettant les valeurs propre dans l'ordre croissant.
+    """"
+    Diagonalise A en mettant les valeurs propre dans l'ordre croissant.
     Attention la fonction ne vérifie pas que A est diagonalisable !
 
     Parameters:
@@ -235,7 +236,8 @@ print("Jc(f2): ", I_2, " ,Erreur d'integration: ", err2)
 ### Question 5 ###
 
 def rectangle_gauche(f, a, b, N=1000):
-    """ Intégration numérique par la méthode des rectangles à gauches.
+    """ 
+    Intégration numérique par la méthode des rectangles à gauches.
 
     Parameters:
     -----------
@@ -330,7 +332,8 @@ sp.pprint(Pi_1)
 # à gauche pour intégrer chaque entrée de la matrice
 
 def contour(gamma, dgamma, A, a, b, N=1000):
-    """Calcule la formule de l'integrale de contour d'une matrice.
+    """
+    Calcule la formule de l'integrale de contour d'une matrice.
 
     Parameters:
     -----------
@@ -381,14 +384,15 @@ print(contour)
 
 
 def projection(A, K):
-    """Calcule la formule de la somme sur k dans K des projections PI_k.
+    """
+    Calcule la formule de la somme sur k dans K des projections PI_k.
 
     Parameters:
     ----------
     A : array.
         Matrice.
     K : array.
-        Veteur contenant les indices.
+        Vecteur contenant les indices.
 
     Returns:
     -------
